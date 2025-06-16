@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PEDRO SANCHEEZ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset y base */
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Pacifico', cursive;
+      background: linear-gradient(to bottom, #1a1a2e, #2f2f4f);
+      color: #ffccdd;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      cursor: none;
+      /* ocultamos cursor nativo */
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      text-align: center;
+      max-width: 600px;
+      line-height: 1.3;
+      margin: 0 1rem;
+      z-index: 10;
+      text-shadow: 0 0 10px #ff4466aa;
+      white-space: pre-line;
+      /* para respetar saltos de línea */
+    }
+
+    .mensaje-secundario {
+      margin-top: 1rem;
+      font-style: italic;
+      font-weight: 500;
+      color: #ff6677cc;
+      max-width: 600px;
+      text-align: center;
+      z-index: 10;
+      text-shadow: 0 0 6px #bb4455aa;
+      animation: parpadeo 3s infinite alternate;
+    }
+
+    @keyframes parpadeo {
+      0% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* SVG hilo */
+    #hilo-svg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: auto;
+      /* activamos eventos para el SVG */
+      z-index: 5;
+      cursor: none;
+      /* ocultamos cursor cuando está sobre el SVG */
+    }
+
+    /* La línea roja base */
+    #hilo-path {
+      fill: none;
+      stroke: #ff4466;
+      stroke-width: 3;
+      filter: drop-shadow(0 0 6px #ff4466aa);
+      stroke-dasharray: 250;
+      stroke-dashoffset: 250;
+      animation: dibujarHilo 8s forwards ease-in-out;
+      transition: stroke-width 0.3s ease;
+    }
+
+    @keyframes dibujarHilo {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* Puntos de luz */
+    .light-point {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #ff6699, #990022);
+      opacity: 0.8;
+      filter: drop-shadow(0 0 8px #ff4466);
+      animation: brillo 3s infinite alternate ease-in-out;
+    }
+
+    .light-point:nth-child(odd) {
+      animation-delay: 1.5s;
+    }
+
+    @keyframes brillo {
+      0% {
+        opacity: 0.4;
+        box-shadow: 0 0 4px 2px #ff4466cc;
+      }
+
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 15px 5px #ff6699ff;
+      }
+    }
+
+    /* Pétalos cayendo */
+    .petalo {
+      position: fixed;
+      top: -50px;
+      width: 25px;
+      height: 25px;
+      background-image: url('https://png.pngtree.com/png-vector/20240312/ourmid/pngtree-realistic-red-rose-white-background-png-image_11716749.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.7;
+      filter: drop-shadow(0 0 4px #990022aa);
+      animation-name: caer;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes caer {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Cursor Hello Kitty */
+    #cursor-hello {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      background-image: url('https://pngimg.com/d/hello_kitty_PNG22.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 20;
+      transition: transform 0.1s ease;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Botón */
+    .btn-mostrar {
+      margin-top: 2rem;
+      padding: 14px 32px;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      border: none;
+      background: #ff4466;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 68, 102, 0.6);
+      transition: background 0.3s ease;
+      z-index: 10;
+      user-select: none;
+    }
+
+    .btn-mostrar:hover {
+      background: #ff6688;
+    }
+
+    /* Imagen sorpresa */
+    #imagenFinal {
+      margin-top: 2rem;
+      max-width: 320px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: all 0.7s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    #imagenFinal.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    #imagenFinal img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Corazones/destellos que siguen el cursor */
+    .sparkle {
+      position: fixed;
+      width: 15px;
+      height: 15px;
+      pointer-events: none;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/833/833472.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.9;
+      animation: sparkleFade 0.8s forwards;
+      z-index: 25;
+      user-select: none;
+    }
+
+    @keyframes sparkleFade {
+      0% {
+        opacity: 0.9;
+        transform: translateY(0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>
+    Aunque el tiempo, la distancia o las circunstancias se interpongan…
+    el hilo nunca se rompe.
+  </h1>
+  <div class="mensaje-secundario">
+    feliz cumpleaños 🐰
+  </div>
+
+  <svg id="hilo-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path id="hilo-path" d="M 10 90 C 30 60, 70 60, 90 20" />
+  </svg>
+
+  <button class="btn-mostrar" id="btnMostrar">Dale clic</button>
+
+  <div id="imagenFinal">
+    <img src="https://i.pinimg.com/736x/73/47/b7/7347b7fe131bd667e240b23976d7cce2.jpg" alt="Sorpresa del hilo rojo" />
+   <div id="mensajeExtra">
+    estoy editando esto desde el móvil, de fiesta y con un globo terrible.
+    Me debes un regalo de cumpleaños JDSJAHD
+  </div>
+  </div>
+
+ 
+
+  <div id="cursor-hello"></div>
+
+  <script>
+    // Crear puntos de luz sobre el hilo (posiciones ajustadas en vw/vh para el nuevo path)
+    const puntos = [
+      { xPercent: 15, yPercent: 78 },
+      { xPercent: 30, yPercent: 62 },
+      { xPercent: 50, yPercent: 62 },
+      { xPercent: 70, yPercent: 40 },
+      { xPercent: 85, yPercent: 22 }
+    ];
+
+    puntos.forEach(({ xPercent, yPercent }) => {
+      const light = document.createElement('div');
+      light.classList.add('light-point');
+      light.style.left = xPercent + 'vw';
+      light.style.top = yPercent + 'vh';
+      light.style.width = '10px';
+      light.style.height = '10px';
+      document.body.appendChild(light);
+    });
+
+    // Crear pétalos cayendo (cantidad + randomización)
+    const numPetalos = 15;
+    for (let i = 0; i < numPetalos; i++) {
+      const petalo = document.createElement('div');
+      petalo.classList.add('petalo');
+      petalo.style.left = Math.random() * 100 + 'vw';
+      petalo.style.animationDuration = (7 + Math.random() * 7) + 's';
+      petalo.style.animationDelay = (Math.random() * 10) + 's';
+      petalo.style.width = (20 + Math.random() * 15) + 'px';
+      petalo.style.height = petalo.style.width;
+      document.body.appendChild(petalo);
+    }
+
+    // Animación para transición suave del path del hilo (interpolación lineal)
+    const hiloPath = document.getElementById('hilo-path');
+
+    // Formas del path (usar las coordenadas del atributo "d")
+    const originalPath = "M 10 90 C 30 60, 70 60, 90 20";
+    const enredadoPath = "M 10 90 C 20 30, 80 90, 90 20"; // ajustado para que "enrede" más
+
+    // Función para parsear coords del path y devolver array de números
+    function parseCoords(path) {
+      return path.match(/-?\d+\.?\d*/g).map(Number);
+    }
+
+    // Interpolación de arrays de números según progreso t (0 a 1)
+    function interpolateArrays(arr1, arr2, t) {
+      return arr1.map((v, i) => v + (arr2[i] - v) * t);
+    }
+
+    // Reconstruir string path a partir de coords (8 números esperados)
+    function buildPath(coords) {
+      return `M ${coords[0]} ${coords[1]} C ${coords[2]} ${coords[3]}, ${coords[4]} ${coords[5]}, ${coords[6]} ${coords[7]}`;
+    }
+
+    // Animar transición entre dos paths
+    function animatePath(from, to, duration = 600) {
+      let start = null;
+      const fromCoords = parseCoords(from);
+      const toCoords = parseCoords(to);
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const elapsed = timestamp - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentCoords = interpolateArrays(fromCoords, toCoords, progress);
+        const newPath = buildPath(currentCoords);
+        hiloPath.setAttribute('d', newPath);
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Variables para controlar estado de la animación
+    let crearChispas = false;
+
+    // Enredar y desenredar el hilo con animación
+    function enredarHilo() {
+      animatePath(originalPath, enredadoPath);
+    }
+    function desenredarHilo() {
+      animatePath(enredadoPath, originalPath);
+    }
+
+    // Chispas / corazones que siguen el cursor mientras mouse está sobre el SVG
+    function crearChispa(x, y) {
+      const chispa = document.createElement('div');
+      chispa.classList.add('sparkle');
+      chispa.style.left = x + 'px';
+      chispa.style.top = y + 'px';
+      document.body.appendChild(chispa);
+      setTimeout(() => {
+        chispa.remove();
+      }, 800);
+    }
+
+    const hiloSVG = document.getElementById('hilo-svg');
+
+    hiloSVG.addEventListener('mouseenter', () => {
+      enredarHilo();
+      crearChispas = true;
+    });
+    hiloSVG.addEventListener('mouseleave', () => {
+      desenredarHilo();
+      crearChispas = false;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      // Mover cursor Hello Kitty
+      const cursorHello = document.getElementById('cursor-hello');
+      cursorHello.style.left = e.clientX + 'px';
+      cursorHello.style.top = e.clientY + 'px';
+
+      // Si el mouse está sobre el SVG, crear chispas
+      if (crearChispas) {
+        crearChispa(e.clientX + (Math.random() * 20 - 10), e.clientY + (Math.random() * 20 - 10));
+      }
+    });
+
+    // Botón para mostrar imagen sorpresa
+    const btnMostrar = document.getElementById('btnMostrar');
+    const imagenFinal = document.getElementById('imagenFinal');
+
+    btnMostrar.addEventListener('click', () => {
+      imagenFinal.classList.add('show');
+      btnMostrar.style.display = 'none';
+    });
+
+  </script>
+</body>
+
+</html>
